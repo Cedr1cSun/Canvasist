@@ -18,6 +18,7 @@ Gradescope assignments usually don't appear in Canvas's assignment list, so chec
 - **Completed and dismissed work folds away** at the bottom of the list
 - **Desktop reminders** before each deadline (24 hours and 3 hours by default, configurable), plus one before a Gradescope late deadline; reminders missed while the computer slept are caught up
 - **Mark as done** (e.g. paper submissions, with a confirmation) and **dismiss** overdue work you won't submit; both are undoable and stay on your computer
+- **Star important work**: starred assignments get their own group at the top (you can turn that off and keep just the star)
 - **Hide courses** you don't care about
 - **Works with most schools**: find your school by name or enter its Canvas address, then sign in on your school's own page (SSO and multi-factor authentication work as usual). No access token needed.
 - **English and Simplified Chinese**, following your system language

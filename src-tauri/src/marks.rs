@@ -1,6 +1,6 @@
-//! The user's own annotations on assignments: "marked as done" and
-//! "dismissed". They live only on this computer (encrypted with DPAPI) and
-//! never change anything on Canvas or Gradescope.
+//! The user's own annotations on assignments: "marked as done", "dismissed"
+//! and "important" (starred). They live only on this computer (encrypted with
+//! DPAPI) and never change anything on Canvas or Gradescope.
 
 use std::collections::BTreeMap;
 use std::sync::{Mutex, MutexGuard, PoisonError};
@@ -25,6 +25,10 @@ pub struct Marks {
     /// Assignment ID -> when the user dismissed it.
     #[serde(with = "timestamp_map")]
     pub dismissed: BTreeMap<String, OffsetDateTime>,
+    /// Assignment ID -> when the user starred it as important. Independent of
+    /// the two marks above: a starred assignment can also be done or dismissed.
+    #[serde(with = "timestamp_map")]
+    pub starred: BTreeMap<String, OffsetDateTime>,
 }
 
 impl Marks {
@@ -32,6 +36,7 @@ impl Marks {
         let keep = |at: &mut OffsetDateTime| now - *at < RETENTION;
         self.done.retain(|_, at| keep(at));
         self.dismissed.retain(|_, at| keep(at));
+        self.starred.retain(|_, at| keep(at));
     }
 }
 
@@ -90,11 +95,21 @@ impl MarkStore {
         })
     }
 
-    /// Undoes either mark.
+    /// Undoes "done" or "dismissed"; a star is kept.
     pub fn restore(&self, id: &str) -> AppResult<Marks> {
         self.update(id, |m, id| {
             m.done.remove(&id);
             m.dismissed.remove(&id);
+        })
+    }
+
+    pub fn set_starred(&self, id: &str, starred: bool) -> AppResult<Marks> {
+        self.update(id, |m, id| {
+            if starred {
+                m.starred.entry(id).or_insert_with(OffsetDateTime::now_utc);
+            } else {
+                m.starred.remove(&id);
+            }
         })
     }
 
@@ -173,6 +188,32 @@ mod tests {
         assert!(!m.done.contains_key("123") && m.dismissed.contains_key("123"));
         let m = marks.restore("123").unwrap();
         assert!(m.done.is_empty() && m.dismissed.is_empty());
+    }
+
+    #[test]
+    fn stars_are_independent_of_other_marks() {
+        let (_dir, marks) = store();
+        let m = marks.set_starred("123", true).unwrap();
+        let starred_at = m.starred["123"];
+        // Starring again keeps the original time.
+        let m = marks.set_starred("123", true).unwrap();
+        assert_eq!(m.starred["123"], starred_at);
+        // Done, dismissed and restore leave the star alone.
+        marks.mark_done("123").unwrap();
+        marks.dismiss("123").unwrap();
+        let m = marks.restore("123").unwrap();
+        assert!(m.starred.contains_key("123"));
+        let m = marks.set_starred("123", false).unwrap();
+        assert!(m.starred.is_empty());
+        assert!(marks.set_starred("a b", true).is_err());
+    }
+
+    #[test]
+    fn marks_saved_before_stars_still_load() {
+        let m: Marks =
+            serde_json::from_str(r#"{"done":{"1":"2026-10-07T00:00:00Z"},"dismissed":{}}"#)
+                .unwrap();
+        assert!(m.done.contains_key("1") && m.starred.is_empty());
     }
 
     #[test]

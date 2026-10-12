@@ -39,6 +39,8 @@ pub struct Settings {
     pub reminder_offsets_minutes: Vec<u32>,
     /// Course IDs the user hid; their assignments are neither shown nor reminded.
     pub hidden_courses: Vec<String>,
+    /// Show starred (important) open assignments in their own group at the top.
+    pub pin_starred: bool,
 }
 
 /// Default reminders: 24 hours and 3 hours before a deadline (discussion Round 10).
@@ -55,6 +57,8 @@ impl Default for Settings {
             show_unsubmittable: false,
             reminder_offsets_minutes: DEFAULT_REMINDER_OFFSETS.to_vec(),
             hidden_courses: Vec::new(),
+            // On by default (discussion Round 15).
+            pin_starred: true,
         }
     }
 }
@@ -188,6 +192,14 @@ mod tests {
         // A settings file from before reminders existed still gets the defaults.
         let old: Settings = serde_json::from_str(r#"{"language":"en"}"#).unwrap();
         assert_eq!(old.reminder_offsets_minutes, vec![1440, 180]);
+    }
+
+    #[test]
+    fn pinning_starred_work_is_on_by_default() {
+        assert!(Settings::default().pin_starred);
+        // Also for a settings file saved before the option existed.
+        let old: Settings = serde_json::from_str(r#"{"language":"en"}"#).unwrap();
+        assert!(old.pin_starred);
     }
 
     #[test]

@@ -65,12 +65,16 @@ export interface Preferences {
   reminderOffsetsMinutes: number[];
   hiddenCourses: string[];
   showUnsubmittable: boolean;
+  /** Show starred open work in its own group at the top. */
+  pinStarred: boolean;
 }
 
 /** The user's local marks: assignment ID -> when it was marked. */
 export interface Marks {
   done: Record<string, string>;
   dismissed: Record<string, string>;
+  /** Starred as important; independent of done and dismissed. */
+  starred: Record<string, string>;
 }
 
 export interface Snapshot {
@@ -125,6 +129,7 @@ export const api = {
   markDone: (id: string) => invoke<Marks>("mark_done", { id }),
   dismiss: (id: string) => invoke<Marks>("dismiss", { id }),
   restore: (id: string) => invoke<Marks>("restore", { id }),
+  setStarred: (id: string, starred: boolean) => invoke<Marks>("set_starred", { id, starred }),
 
   getPreferences: () => invoke<Preferences>("get_preferences"),
   setReminderOffsets: (minutes: number[]) =>
@@ -132,6 +137,7 @@ export const api = {
   setCourseHidden: (courseId: string, hidden: boolean) =>
     invoke<Preferences>("set_course_hidden", { courseId, hidden }),
   setShowUnsubmittable: (show: boolean) => invoke<Preferences>("set_show_unsubmittable", { show }),
+  setPinStarred: (pin: boolean) => invoke<Preferences>("set_pin_starred", { pin }),
 };
 
 export const events = {

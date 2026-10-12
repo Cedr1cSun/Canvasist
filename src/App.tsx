@@ -278,6 +278,7 @@ function Shell({
               snapshot={visibleSnapshot}
               locale={settings.effectiveLocale}
               error={refreshError}
+              pinStarred={preferences.pinStarred}
             />
           </>
         )}

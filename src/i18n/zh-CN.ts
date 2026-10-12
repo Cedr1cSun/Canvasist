@@ -32,6 +32,7 @@ export const zhCN: Record<MessageKey, string> = {
   "list.allDone": "所有作业都已完成。",
   "list.updated": "更新于 {time}",
 
+  "group.important": "重要",
   "group.overdue": "已逾期",
   "group.today": "今天",
   "group.tomorrow": "明天",
@@ -45,6 +46,8 @@ export const zhCN: Record<MessageKey, string> = {
   "menu.markDone": "标记为已完成",
   "menu.dismiss": "划除",
   "menu.restore": "恢复",
+  "menu.star": "标为重要",
+  "menu.unstar": "取消重要",
 
   "confirm.markDone.title": "标记为已完成？",
   "confirm.markDone.body": "《{title}》将移入“已完成”，之后可以随时恢复。",
@@ -54,6 +57,7 @@ export const zhCN: Record<MessageKey, string> = {
   "list.openInGradescope": "在 Gradescope 中打开",
   "list.lateDue": "迟交截止 {date}",
   "list.canvasDueDiffers": "Canvas 显示 {date}",
+  "list.starred": "重要",
   "countdown.hoursMinutes": "还剩 {h} 小时 {m} 分",
   "countdown.minutes": "还剩 {m} 分钟",
 
@@ -92,6 +96,8 @@ export const zhCN: Record<MessageKey, string> = {
   "settings.courses": "课程",
   "settings.courses.hint": "关闭不想看到的课程，它们的作业将被隐藏，也不会提醒。",
   "settings.courses.empty": "首次刷新后，课程会显示在这里。",
+  "settings.pinStarred": "置顶重要作业",
+  "settings.pinStarred.hint": "星标作业单独显示在列表最上方的“重要”分组。",
   "settings.unsubmittable": "显示无需提交的项目",
   "settings.unsubmittable.hint": "例如老师直接录入的考试成绩。",
   "settings.account": "Canvas 账户",

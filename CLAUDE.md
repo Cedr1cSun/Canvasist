@@ -60,7 +60,7 @@ CI (`.github/workflows/ci.yml`) runs exactly these checks on `windows-latest`. T
 
 - `harden.ts` freezes `Object.prototype` and must stay the first import in `main.tsx`. Do **not** use Tauri's `freezePrototype` option instead: Tauri injects it into every webview, and it breaks schools' SSO/Duo pages in the login window.
 - `ipc.ts` has typed wrappers for every command and event; keep it in sync with `commands.rs` and `account.rs`. `errors.ts` maps `AppError.kind` to localized text.
-- `App.tsx` holds the state machine: loading → connect → login pending → list or settings. It also filters hidden courses out of the snapshot. Pure logic lives in tested modules: `grouping.ts` (Overdue/Today/Tomorrow/7 days/Later plus folded Completed and Dismissed), `urgency.ts` and `format.ts`.
+- `App.tsx` holds the state machine: loading → connect → login pending → list or settings. It also filters hidden courses out of the snapshot. Pure logic lives in tested modules: `grouping.ts` (Important for starred work when pinned, then Overdue/Today/Tomorrow/7 days/Later, plus folded Completed and Dismissed), `urgency.ts` and `format.ts`.
 - i18n: `i18n/en.ts` is the source catalog. `zh-CN.ts` is typed as `Record<MessageKey, string>`, so a missing or extra key fails `typecheck`.
 
 ## Rules that span files

@@ -23,10 +23,12 @@
     "allow-mark-done",
     "allow-dismiss",
     "allow-restore",
+    "allow-set-starred",
     "allow-get-preferences",
     "allow-set-reminder-offsets",
     "allow-set-course-hidden",
     "allow-set-show-unsubmittable",
+    "allow-set-pin-starred",
     "core:event:allow-listen",
     "core:event:allow-unlisten"
   ]

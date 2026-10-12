@@ -565,6 +565,12 @@ legend.settings__label + * {
   white-space: nowrap;
 }
 
+.star {
+  margin-right: 4px;
+  vertical-align: -1px;
+  color: var(--accent-warm);
+}
+
 .assignment__meta {
   display: flex;
   flex-direction: column;

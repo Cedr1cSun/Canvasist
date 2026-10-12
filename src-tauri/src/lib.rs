@@ -83,10 +83,12 @@ pub fn run() {
             commands::mark_done,
             commands::dismiss,
             commands::restore,
+            commands::set_starred,
             commands::get_preferences,
             commands::set_reminder_offsets,
             commands::set_course_hidden,
             commands::set_show_unsubmittable,
+            commands::set_pin_starred,
         ])
         .build(tauri::generate_context!())
         .expect("failed to build the Canvasist application");

@@ -182,6 +182,12 @@ pub fn restore(marks: State<'_, MarkStore>, id: String) -> AppResult<Marks> {
     marks.restore(&id)
 }
 
+/// Stars an assignment as important, or removes the star.
+#[tauri::command]
+pub fn set_starred(marks: State<'_, MarkStore>, id: String, starred: bool) -> AppResult<Marks> {
+    marks.set_starred(&id, starred)
+}
+
 // ---------- preferences (reminders, hidden courses, display rules) ----------
 
 #[derive(Debug, Serialize)]
@@ -190,6 +196,7 @@ pub struct Preferences {
     reminder_offsets_minutes: Vec<u32>,
     hidden_courses: Vec<String>,
     show_unsubmittable: bool,
+    pin_starred: bool,
 }
 
 fn preferences(store: &SettingsStore) -> Preferences {
@@ -198,6 +205,7 @@ fn preferences(store: &SettingsStore) -> Preferences {
         reminder_offsets_minutes: s.reminder_offsets_minutes,
         hidden_courses: s.hidden_courses,
         show_unsubmittable: s.show_unsubmittable,
+        pin_starred: s.pin_starred,
     }
 }
 
@@ -247,5 +255,11 @@ pub fn set_show_unsubmittable(
     show: bool,
 ) -> AppResult<Preferences> {
     store.update(|s| s.show_unsubmittable = show)?;
+    Ok(preferences(&store))
+}
+
+#[tauri::command]
+pub fn set_pin_starred(store: State<'_, SettingsStore>, pin: bool) -> AppResult<Preferences> {
+    store.update(|s| s.pin_starred = pin)?;
     Ok(preferences(&store))
 }

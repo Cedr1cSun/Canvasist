@@ -1,10 +1,18 @@
 import type { Assignment, AssignmentStatus, Marks } from "./ipc";
 
-/** Display groups from the lighthouse (G5), in on-screen order. */
+/** Display groups from the lighthouse (G3, G5), in on-screen order. */
 export type GroupKey =
-  "overdue" | "today" | "tomorrow" | "nextSevenDays" | "later" | "completed" | "dismissed";
+  | "important"
+  | "overdue"
+  | "today"
+  | "tomorrow"
+  | "nextSevenDays"
+  | "later"
+  | "completed"
+  | "dismissed";
 
 export const GROUP_ORDER: readonly GroupKey[] = [
+  "important",
   "overdue",
   "today",
   "tomorrow",
@@ -20,7 +28,7 @@ export const FOLDED_GROUPS: ReadonlySet<GroupKey> = new Set(["completed", "dismi
 const DONE: ReadonlySet<AssignmentStatus> = new Set(["submitted", "late", "graded", "excused"]);
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-export const NO_MARKS: Marks = { done: {}, dismissed: {} };
+export const NO_MARKS: Marks = { done: {}, dismissed: {}, starred: {} };
 
 export function isDone(status: AssignmentStatus): boolean {
   return DONE.has(status);
@@ -31,6 +39,15 @@ export function isManuallyDone(assignment: Assignment, marks: Marks): boolean {
   return !isDone(assignment.status) && assignment.id in marks.done;
 }
 
+export function isStarred(assignment: Assignment, marks: Marks): boolean {
+  return assignment.id in marks.starred;
+}
+
+/** Past its deadline (or reported missing), whatever group it is shown in. */
+export function isOverdue(assignment: Assignment, now: Date): boolean {
+  return assignment.status === "missing" || new Date(assignment.dueAt) < now;
+}
+
 function startOfDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
@@ -39,16 +56,26 @@ function addDays(d: Date, days: number): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() + days);
 }
 
-/** Assigns one assignment to its display group, using local calendar days. */
-export function groupOf(assignment: Assignment, now: Date, marks: Marks = NO_MARKS): GroupKey {
+/**
+ * Assigns one assignment to its display group, using local calendar days.
+ * With `pinStarred`, starred open work goes to "important" at the top; once
+ * done or dismissed it folds away like any other assignment.
+ */
+export function groupOf(
+  assignment: Assignment,
+  now: Date,
+  marks: Marks = NO_MARKS,
+  pinStarred = false,
+): GroupKey {
   // Real submission data wins over the user's own marks.
   if (isDone(assignment.status)) return "completed";
   if (assignment.id in marks.dismissed) return "dismissed";
   if (assignment.id in marks.done) return "completed";
+  if (pinStarred && isStarred(assignment, marks)) return "important";
+
+  if (isOverdue(assignment, now)) return "overdue";
 
   const due = new Date(assignment.dueAt);
-  if (assignment.status === "missing" || due < now) return "overdue";
-
   const today = startOfDay(now);
   if (due < addDays(today, 1)) return "today";
   if (due < addDays(today, 2)) return "tomorrow";
@@ -64,9 +91,10 @@ export function groupAssignments(
   assignments: readonly Assignment[],
   now: Date,
   marks: Marks = NO_MARKS,
+  pinStarred = false,
 ): Map<GroupKey, Assignment[]> {
   const groups = new Map<GroupKey, Assignment[]>(GROUP_ORDER.map((k) => [k, []]));
-  for (const a of assignments) groups.get(groupOf(a, now, marks))?.push(a);
+  for (const a of assignments) groups.get(groupOf(a, now, marks, pinStarred))?.push(a);
 
   const byDue = (a: Assignment, b: Assignment) => Date.parse(a.dueAt) - Date.parse(b.dueAt);
   for (const [key, list] of groups) {

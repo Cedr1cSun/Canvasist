@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { groupAssignments, groupOf, isManuallyDone } from "./grouping";
+import { groupAssignments, groupOf, isManuallyDone, isOverdue } from "./grouping";
 import type { Assignment, AssignmentStatus, Marks } from "./ipc";
 
 // Dates are built in local time so the tests pass in any time zone.
@@ -23,12 +23,10 @@ function assignment(id: string, due: Date, status: AssignmentStatus = "notSubmit
   };
 }
 
-function marks(done: string[] = [], dismissed: string[] = []): Marks {
+function marks(done: string[] = [], dismissed: string[] = [], starred: string[] = []): Marks {
   const at = "2026-10-07T00:00:00Z";
-  return {
-    done: Object.fromEntries(done.map((id) => [id, at])),
-    dismissed: Object.fromEntries(dismissed.map((id) => [id, at])),
-  };
+  const map = (ids: string[]) => Object.fromEntries(ids.map((id) => [id, at]));
+  return { done: map(done), dismissed: map(dismissed), starred: map(starred) };
 }
 
 describe("groupOf", () => {
@@ -67,6 +65,33 @@ describe("groupOf", () => {
     expect(isManuallyDone(graded, marks(["a"]))).toBe(false);
     expect(isManuallyDone(assignment("b", new Date(2026, 9, 9)), marks(["b"]))).toBe(true);
   });
+
+  it("pins starred open work to important only when pinning is on", () => {
+    const starred = marks([], [], ["a"]);
+    const later = assignment("a", new Date(2026, 9, 20));
+    const overdue = assignment("a", new Date(2026, 9, 1), "missing");
+    expect(groupOf(later, NOW, starred, true)).toBe("important");
+    expect(groupOf(overdue, NOW, starred, true)).toBe("important");
+    expect(groupOf(later, NOW, starred, false)).toBe("later");
+    expect(groupOf(assignment("b", new Date(2026, 9, 20)), NOW, starred, true)).toBe("later");
+  });
+
+  it("folds starred work away once it is done or dismissed", () => {
+    const due = new Date(2026, 9, 1);
+    expect(groupOf(assignment("a", due, "graded"), NOW, marks([], [], ["a"]), true)).toBe(
+      "completed",
+    );
+    expect(groupOf(assignment("a", due), NOW, marks(["a"], [], ["a"]), true)).toBe("completed");
+    expect(groupOf(assignment("a", due), NOW, marks([], ["a"], ["a"]), true)).toBe("dismissed");
+  });
+});
+
+describe("isOverdue", () => {
+  it("does not depend on the group an assignment is shown in", () => {
+    expect(isOverdue(assignment("a", new Date(2026, 9, 7, 11, 59)), NOW)).toBe(true);
+    expect(isOverdue(assignment("a", new Date(2026, 9, 9), "missing"), NOW)).toBe(true);
+    expect(isOverdue(assignment("a", new Date(2026, 9, 7, 12, 1)), NOW)).toBe(false);
+  });
 });
 
 describe("groupAssignments", () => {
@@ -83,5 +108,22 @@ describe("groupAssignments", () => {
     expect(groups.get("later")?.map((a) => a.id)).toEqual(["later-1", "later-2"]);
     expect(groups.get("completed")?.map((a) => a.id)).toEqual(["done-new", "done-old"]);
     expect(groups.get("today")).toEqual([]);
+  });
+
+  it("sorts the important group soonest first, above everything else", () => {
+    const groups = groupAssignments(
+      [
+        assignment("star-later", new Date(2026, 9, 20)),
+        assignment("plain", new Date(2026, 9, 7, 18, 0)),
+        assignment("star-overdue", new Date(2026, 9, 1), "missing"),
+      ],
+      NOW,
+      marks([], [], ["star-later", "star-overdue"]),
+      true,
+    );
+    expect([...groups.keys()][0]).toBe("important");
+    expect(groups.get("important")?.map((a) => a.id)).toEqual(["star-overdue", "star-later"]);
+    expect(groups.get("today")?.map((a) => a.id)).toEqual(["plain"]);
+    expect(groups.get("overdue")).toEqual([]);
   });
 });

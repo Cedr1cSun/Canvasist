@@ -22,10 +22,12 @@ fn main() {
             "mark_done",
             "dismiss",
             "restore",
+            "set_starred",
             "get_preferences",
             "set_reminder_offsets",
             "set_course_hidden",
             "set_show_unsubmittable",
+            "set_pin_starred",
         ]),
     ))
     .expect("failed to run tauri-build");

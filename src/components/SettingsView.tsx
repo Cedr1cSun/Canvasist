@@ -10,7 +10,7 @@ import {
   type Preferences,
 } from "../ipc";
 import { BackIcon } from "./icons";
-import { CourseSettings, ReminderSettings, UnsubmittableSetting } from "./PreferenceSections";
+import { CourseSettings, ReminderSettings, SwitchSetting } from "./PreferenceSections";
 
 interface Props {
   language: LanguagePreference;
@@ -158,7 +158,16 @@ export function SettingsView({
               run(async () => onPreferencesChange(await api.setCourseHidden(id, hidden)))
             }
           />
-          <UnsubmittableSetting
+          <SwitchSetting
+            label={t("settings.pinStarred")}
+            hint={t("settings.pinStarred.hint")}
+            checked={preferences.pinStarred}
+            disabled={busy}
+            onChange={(pin) => run(async () => onPreferencesChange(await api.setPinStarred(pin)))}
+          />
+          <SwitchSetting
+            label={t("settings.unsubmittable")}
+            hint={t("settings.unsubmittable.hint")}
             checked={preferences.showUnsubmittable}
             disabled={busy}
             onChange={(show) =>

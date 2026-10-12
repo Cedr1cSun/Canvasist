@@ -77,3 +77,23 @@ export function LogoMark({ size = 48 }: { size?: number }) {
     </svg>
   );
 }
+
+/** A small filled star marking an important (starred) assignment. */
+export function StarIcon({ label }: { label: string }) {
+  return (
+    <svg
+      className="star"
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      role="img"
+      aria-label={label}
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"
+      />
+    </svg>
+  );
+}

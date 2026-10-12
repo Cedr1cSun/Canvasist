@@ -127,22 +127,24 @@ export function CourseSettings({ courses, hidden, disabled, onToggle }: CoursesP
   );
 }
 
-interface UnsubmittableProps {
+interface SwitchProps {
+  label: string;
+  hint: string;
   checked: boolean;
   disabled: boolean;
-  onChange: (show: boolean) => void;
+  onChange: (on: boolean) => void;
 }
 
-export function UnsubmittableSetting({ checked, disabled, onChange }: UnsubmittableProps) {
-  const t = useT();
+/** A labelled on/off setting. */
+export function SwitchSetting({ label, hint, checked, disabled, onChange }: SwitchProps) {
   const labelId = useId();
   return (
     <div className="settings__group settings__row">
       <div>
         <p className="settings__label" id={labelId}>
-          {t("settings.unsubmittable")}
+          {label}
         </p>
-        <p className="settings__hint">{t("settings.unsubmittable.hint")}</p>
+        <p className="settings__hint">{hint}</p>
       </div>
       <button
         type="button"

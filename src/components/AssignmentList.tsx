@@ -7,6 +7,8 @@ import {
   NO_MARKS,
   groupAssignments,
   isManuallyDone,
+  isOverdue,
+  isStarred,
   type GroupKey,
 } from "../grouping";
 import { useT } from "../i18n/context";
@@ -14,15 +16,18 @@ import type { Locale } from "../i18n/translate";
 import { api, toAppError, type AppError, type Assignment, type Marks, type Snapshot } from "../ipc";
 import { timeLeft, urgencyOf, useNow } from "../urgency";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { StarIcon } from "./icons";
 import { RowMenu, type MenuAction } from "./RowMenu";
 
 interface Props {
   snapshot: Snapshot | null;
   locale: Locale;
   error: AppError | null;
+  /** Show starred open work in the "Important" group at the top. */
+  pinStarred: boolean;
 }
 
-export function AssignmentList({ snapshot, locale, error }: Props) {
+export function AssignmentList({ snapshot, locale, error, pinStarred }: Props) {
   const t = useT();
   const [marks, setMarks] = useState<Marks>(NO_MARKS);
   const [markError, setMarkError] = useState<AppError | null>(null);
@@ -61,8 +66,8 @@ export function AssignmentList({ snapshot, locale, error }: Props) {
     [snapshot],
   );
   const groups = useMemo(
-    () => (snapshot ? groupAssignments(snapshot.assignments, now, marks) : null),
-    [snapshot, marks, now],
+    () => (snapshot ? groupAssignments(snapshot.assignments, now, marks, pinStarred) : null),
+    [snapshot, marks, now, pinStarred],
   );
 
   const openCount = groups
@@ -78,6 +83,14 @@ export function AssignmentList({ snapshot, locale, error }: Props) {
       const url = a.url;
       actions.push({ label: t("menu.open"), onSelect: () => void api.openExternal(url) });
     }
+    // A star can be removed anywhere, but only open work can be starred.
+    const starred = isStarred(a, marks);
+    if (starred || !FOLDED_GROUPS.has(group)) {
+      actions.push({
+        label: t(starred ? "menu.unstar" : "menu.star"),
+        onSelect: () => void applyMark(() => api.setStarred(a.id, !starred)),
+      });
+    }
     const manual = isManuallyDone(a, marks);
     if (group === "dismissed" || manual) {
       actions.push({
@@ -86,7 +99,8 @@ export function AssignmentList({ snapshot, locale, error }: Props) {
       });
     } else if (group !== "completed") {
       actions.push({ label: t("menu.markDone"), onSelect: () => setConfirming(a) });
-      if (group === "overdue") {
+      // Also for overdue work pinned to the "Important" group.
+      if (isOverdue(a, now)) {
         actions.push({
           label: t("menu.dismiss"),
           onSelect: () => void applyMark(() => api.dismiss(a.id)),
@@ -137,6 +151,7 @@ export function AssignmentList({ snapshot, locale, error }: Props) {
                   assignment={a}
                   group={key}
                   manual={isManuallyDone(a, marks)}
+                  starred={isStarred(a, marks)}
                   courseCode={courseCodes.get(a.courseId)}
                   locale={locale}
                   now={now}
@@ -212,20 +227,31 @@ interface RowProps {
   assignment: Assignment;
   group: GroupKey;
   manual: boolean;
+  starred: boolean;
   courseCode: string | undefined;
   locale: Locale;
   now: Date;
   actions: readonly MenuAction[];
 }
 
-function Row({ assignment: a, group, manual, courseCode, locale, now, actions }: RowProps) {
+function Row({
+  assignment: a,
+  group,
+  manual,
+  starred,
+  courseCode,
+  locale,
+  now,
+  actions,
+}: RowProps) {
   const t = useT();
   // Today and tomorrow already name the day, so only the time is shown.
   const timeOnly = group === "today" || group === "tomorrow";
   const folded = FOLDED_GROUPS.has(group);
   const statusKey = manual ? "manualDone" : a.status;
   const url = a.url;
-  const urgency = folded ? null : urgencyOf(a.dueAt, now, group === "overdue");
+  // From the assignment itself, so pinned work keeps its usual colour.
+  const urgency = folded ? null : urgencyOf(a.dueAt, now, isOverdue(a, now));
   const left = urgency === "urgent" ? timeLeft(a.dueAt, now) : null;
   const rowClass = folded ? " assignment--done" : ` assignment--${urgency}`;
   return (
@@ -245,7 +271,10 @@ function Row({ assignment: a, group, manual, courseCode, locale, now, actions }:
             {courseCode}
             {a.source === "gradescope" && <span className="source-tag">Gradescope</span>}
           </span>
-          <span className="assignment__title">{a.title}</span>
+          <span className="assignment__title">
+            {starred && <StarIcon label={t("list.starred")} />}
+            {a.title}
+          </span>
         </span>
         <span className="assignment__meta">
           <span className="assignment__due">

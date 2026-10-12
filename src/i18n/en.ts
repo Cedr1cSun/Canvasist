@@ -31,6 +31,7 @@ export const en = {
   "list.allDone": "You're all caught up.",
   "list.updated": "Updated {time}",
 
+  "group.important": "Important",
   "group.overdue": "Overdue",
   "group.today": "Today",
   "group.tomorrow": "Tomorrow",
@@ -44,6 +45,8 @@ export const en = {
   "menu.markDone": "Mark as done",
   "menu.dismiss": "Dismiss",
   "menu.restore": "Restore",
+  "menu.star": "Mark as important",
+  "menu.unstar": "Remove from important",
 
   "confirm.markDone.title": "Mark as done?",
   "confirm.markDone.body": "“{title}” will move to Completed. You can restore it at any time.",
@@ -53,6 +56,7 @@ export const en = {
   "list.openInGradescope": "Open in Gradescope",
   "list.lateDue": "Late until {date}",
   "list.canvasDueDiffers": "Canvas says {date}",
+  "list.starred": "Important",
   "countdown.hoursMinutes": "{h}h {m}m left",
   "countdown.minutes": "{m} min left",
 
@@ -94,6 +98,8 @@ export const en = {
   "settings.courses.hint":
     "Turn off courses you don't want to see. Their assignments are hidden and never reminded.",
   "settings.courses.empty": "Courses appear here after the first refresh.",
+  "settings.pinStarred": "Pin important work to the top",
+  "settings.pinStarred.hint": "Starred assignments get their own group above Overdue.",
   "settings.unsubmittable": "Show items that need no submission",
   "settings.unsubmittable.hint": "Such as exam scores entered by instructors.",
   "settings.account": "Canvas account",
