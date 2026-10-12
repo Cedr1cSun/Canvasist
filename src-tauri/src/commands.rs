@@ -5,7 +5,6 @@
 
 use serde::Serialize;
 use tauri::{AppHandle, Manager, State};
-use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_opener::OpenerExt;
 use url::Url;
 
@@ -16,7 +15,7 @@ use crate::error::{AppError, AppResult};
 use crate::locale::{self, Locale};
 use crate::marks::{MarkStore, Marks};
 use crate::settings::{normalize_reminder_offsets, LanguagePreference, SettingsStore};
-use crate::{gradescope, http, tray};
+use crate::{autostart, gradescope, http, tray};
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -57,19 +56,15 @@ pub fn set_language(
 }
 
 #[tauri::command]
-pub fn get_autostart(app: AppHandle) -> AppResult<bool> {
-    Ok(app.autolaunch().is_enabled()?)
+pub fn get_autostart(app: AppHandle) -> bool {
+    autostart::is_enabled(&app.package_info().name)
 }
 
 #[tauri::command]
 pub fn set_autostart(app: AppHandle, enabled: bool) -> AppResult<bool> {
-    let launcher = app.autolaunch();
-    if enabled {
-        launcher.enable()?;
-    } else {
-        launcher.disable()?;
-    }
-    Ok(launcher.is_enabled()?)
+    let product = &app.package_info().name;
+    autostart::set_enabled(product, enabled)?;
+    Ok(autostart::is_enabled(product))
 }
 
 #[tauri::command]

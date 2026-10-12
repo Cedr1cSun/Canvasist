@@ -51,6 +51,7 @@ CI (`.github/workflows/ci.yml`) runs exactly these checks on `windows-latest`. T
 - **Storage**:
   - `secure_store.rs` writes DPAPI-encrypted `<name>.bin` records in the app local data dir. Use it for the session, snapshot, marks and reminder log: anything personal.
   - `settings.rs` is plain JSON in the config dir and must hold only non-personal preferences (course IDs are fine; names are not).
+- **`autostart.rs`** writes the per-user `Run` registry entry itself, with the exe path quoted, and release builds re-point it at the running exe on every start (after a move to another folder). Don't bring back tauri-plugin-autostart: it registers the path unquoted. The value is named after the product name, which the uninstaller also removes.
 - **`dpapi.rs`** is the only module allowed `unsafe`; the crate sets `unsafe_code = "deny"`.
 - **`error.rs`**: `AppError` serializes to `{ kind, ... }` for the frontend.
 

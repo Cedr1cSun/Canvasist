@@ -73,12 +73,6 @@ impl AppError {
     }
 }
 
-impl From<tauri_plugin_autostart::Error> for AppError {
-    fn from(e: tauri_plugin_autostart::Error) -> Self {
-        Self::Autostart(e.to_string())
-    }
-}
-
 impl From<reqwest::Error> for AppError {
     fn from(e: reqwest::Error) -> Self {
         // Request URLs can carry course or assignment IDs; never surface them.

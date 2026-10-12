@@ -1,6 +1,7 @@
 //! Canvasist desktop application.
 
 mod account;
+mod autostart;
 mod canvas;
 mod commands;
 mod domain;
@@ -20,17 +21,13 @@ mod tray;
 mod window;
 
 use tauri::{AppHandle, Manager, RunEvent};
-use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
 use crate::account::Account;
+use crate::autostart::AUTOSTART_ARG;
 use crate::marks::MarkStore;
 use crate::reminders::ReminderLog;
 use crate::secure_store::SecureStore;
 use crate::settings::SettingsStore;
-
-/// Argument the OS autostart entry launches us with; the app then starts
-/// silently in the tray instead of opening its window.
-const AUTOSTART_ARG: &str = "--autostart";
 
 pub fn run() {
     let app = tauri::Builder::default()
@@ -39,10 +36,6 @@ pub fn run() {
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             window::show_main(app);
         }))
-        .plugin(tauri_plugin_autostart::init(
-            MacosLauncher::LaunchAgent,
-            Some(vec![AUTOSTART_ARG]),
-        ))
         .plugin(logger())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
@@ -56,7 +49,7 @@ pub fn run() {
             app.manage(MarkStore::load(SecureStore::new(data_dir.clone())));
             app.manage(ReminderLog::load(SecureStore::new(data_dir)));
 
-            apply_first_run_defaults(app.handle());
+            apply_autostart_defaults(app.handle());
             tray::create(app.handle())?;
             scheduler::start(app.handle().clone());
 
@@ -132,14 +125,21 @@ fn logger() -> tauri::plugin::TauriPlugin<tauri::Wry> {
         .build()
 }
 
-/// Turns autostart on the first time a release build runs. Debug builds never
-/// register themselves with the OS, and a user's later choice is never overridden.
-fn apply_first_run_defaults(app: &AppHandle) {
-    let store = app.state::<SettingsStore>();
-    if store.get().autostart_initialized || cfg!(debug_assertions) {
+/// Turns autostart on the first time a release build runs, and afterwards
+/// keeps the entry pointing at this installation. Debug builds never register
+/// themselves with the OS, and a user's later choice is never overridden.
+fn apply_autostart_defaults(app: &AppHandle) {
+    if cfg!(debug_assertions) {
         return;
     }
-    if let Err(e) = app.autolaunch().enable() {
+    let store = app.state::<SettingsStore>();
+    if store.get().autostart_initialized {
+        if let Err(e) = autostart::refresh(&app.package_info().name) {
+            log::warn!("could not update the autostart entry: {e}");
+        }
+        return;
+    }
+    if let Err(e) = autostart::set_enabled(&app.package_info().name, true) {
         log::warn!("could not enable autostart on first run: {e}");
         return;
     }
