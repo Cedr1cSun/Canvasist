@@ -60,7 +60,8 @@
         "installMode": "currentUser",
         "languages": ["English", "SimpChinese"],
         "displayLanguageSelector": false,
-        "startMenuFolder": "Canvasist"
+        "startMenuFolder": "Canvasist",
+        "installerHooks": "./windows/installer-hooks.nsh"
       },
       "webviewInstallMode": {
         "type": "downloadBootstrapper"
