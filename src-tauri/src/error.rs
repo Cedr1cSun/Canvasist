@@ -48,6 +48,9 @@ pub enum AppError {
 
     #[error("invalid input")]
     InvalidInput,
+
+    #[error("update error: {0}")]
+    Update(String),
 }
 
 impl AppError {
@@ -69,6 +72,7 @@ impl AppError {
             Self::GradescopeAuth => "gradescopeAuth",
             Self::GradescopeStatus(_) => "gradescope",
             Self::InvalidInput => "invalidInput",
+            Self::Update(_) => "update",
         }
     }
 }
@@ -77,6 +81,13 @@ impl From<reqwest::Error> for AppError {
     fn from(e: reqwest::Error) -> Self {
         // Request URLs can carry course or assignment IDs; never surface them.
         Self::Network(e.without_url().to_string())
+    }
+}
+
+impl From<tauri_plugin_updater::Error> for AppError {
+    fn from(e: tauri_plugin_updater::Error) -> Self {
+        // Only release URLs and version numbers, nothing personal.
+        Self::Update(e.to_string())
     }
 }
 

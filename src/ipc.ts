@@ -15,6 +15,11 @@ export interface AppInfo {
   version: string;
 }
 
+/** A downloaded, verified update waiting to be installed. */
+export interface UpdateInfo {
+  version: string;
+}
+
 export interface School {
   name: string;
   url: string;
@@ -67,6 +72,8 @@ export interface Preferences {
   showUnsubmittable: boolean;
   /** Show starred open work in its own group at the top. */
   pinStarred: boolean;
+  /** Check for a new version once a day and download it in the background. */
+  autoUpdate: boolean;
 }
 
 /** The user's local marks: assignment ID -> when it was marked. */
@@ -99,7 +106,8 @@ export type ErrorKind =
   | "busy"
   | "gradescopeAuth"
   | "gradescope"
-  | "invalidInput";
+  | "invalidInput"
+  | "update";
 
 export interface AppError {
   kind: ErrorKind;
@@ -138,6 +146,11 @@ export const api = {
     invoke<Preferences>("set_course_hidden", { courseId, hidden }),
   setShowUnsubmittable: (show: boolean) => invoke<Preferences>("set_show_unsubmittable", { show }),
   setPinStarred: (pin: boolean) => invoke<Preferences>("set_pin_starred", { pin }),
+  setAutoUpdate: (enabled: boolean) => invoke<Preferences>("set_auto_update", { enabled }),
+
+  getUpdate: () => invoke<UpdateInfo | null>("get_update"),
+  /** Starts the installer, which closes and restarts Canvasist. */
+  installUpdate: () => invoke<null>("install_update"),
 };
 
 export const events = {
@@ -149,6 +162,8 @@ export const events = {
     listen<Snapshot>("snapshot-updated", (e) => handler(e.payload)),
   onGradescopeLoginCompleted: (handler: () => void): Promise<UnlistenFn> =>
     listen("gradescope-login-completed", () => handler()),
+  onUpdateReady: (handler: (update: UpdateInfo) => void): Promise<UnlistenFn> =>
+    listen<UpdateInfo>("update-ready", (e) => handler(e.payload)),
 };
 
 function isAppError(e: unknown): e is AppError {

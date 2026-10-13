@@ -76,6 +76,8 @@ export const en = {
   "banner.gradescopeDirectAction": "Sign in to Gradescope",
   "banner.gradescopeUnavailable":
     "Gradescope couldn't be reached. It will be retried on the next refresh.",
+  "banner.update": "Version {version} is ready.",
+  "banner.updateAction": "Restart to update",
 
   "settings.title": "Settings",
   "settings.back": "Back",
@@ -83,6 +85,9 @@ export const en = {
   "settings.language.system": "System default",
   "settings.autostart": "Start when I sign in to Windows",
   "settings.autostart.hint": "Canvasist runs quietly in the tray so reminders keep working.",
+  "settings.autoUpdate": "Check for updates automatically",
+  "settings.autoUpdate.hint":
+    "Once a day, Canvasist asks GitHub for a new version and downloads it. Updates are signature-checked and only installed when you choose to restart.",
   "settings.reminders": "Reminders",
   "settings.reminders.hint":
     "Desktop notifications before each deadline. Finished, dismissed and hidden work is never reminded.",
@@ -120,6 +125,7 @@ export const en = {
   "error.sessionExpired": "Your Canvas session has expired. Please sign in again.",
   "error.canvas": "Canvas returned an error ({message}).",
   "error.busy": "A refresh is already in progress.",
+  "error.update": "The update couldn't be installed ({message}).",
 } as const;
 
 export type MessageKey = keyof typeof en;

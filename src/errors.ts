@@ -17,6 +17,8 @@ export function describeError(t: TranslateFn, error: AppError): string {
       return t("error.canvas", { message: error.message });
     case "busy":
       return t("error.busy");
+    case "update":
+      return t("error.update", { message: error.message });
     default:
       return t("error.generic", { message: error.message });
   }

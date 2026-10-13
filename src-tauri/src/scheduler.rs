@@ -1,5 +1,6 @@
 //! Background work while Canvasist sits in the tray: hourly refreshes,
-//! a refresh after the computer wakes, and deadline reminders.
+//! a refresh after the computer wakes, deadline reminders and the daily
+//! update check.
 //!
 //! Everything runs on one lightweight async task; no window or browser is
 //! involved, which keeps the idle footprint small.
@@ -16,6 +17,7 @@ use crate::marks::MarkStore;
 use crate::notify;
 use crate::reminders::{self, ReminderLog, Rules};
 use crate::settings::SettingsStore;
+use crate::update;
 
 /// How often the task wakes up to check reminders.
 const TICK: StdDuration = StdDuration::from_secs(30);
@@ -54,6 +56,7 @@ pub fn start(app: AppHandle) {
             }
 
             check_reminders(&app);
+            update::tick(&app, now);
             tokio::time::sleep(TICK).await;
         }
     });

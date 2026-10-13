@@ -41,6 +41,11 @@ pub struct Settings {
     pub hidden_courses: Vec<String>,
     /// Show starred (important) open assignments in their own group at the top.
     pub pin_starred: bool,
+    /// Check GitHub for new versions once a day and download them in the background.
+    pub auto_update: bool,
+    /// The version being installed, set just before an update the user chose
+    /// starts. The restarted app opens its window when its version matches.
+    pub updating_to: Option<String>,
 }
 
 /// Default reminders: 24 hours and 3 hours before a deadline (discussion Round 10).
@@ -59,6 +64,9 @@ impl Default for Settings {
             hidden_courses: Vec::new(),
             // On by default (discussion Round 15).
             pin_starred: true,
+            // On by default (discussion Round 15).
+            auto_update: true,
+            updating_to: None,
         }
     }
 }
@@ -200,6 +208,14 @@ mod tests {
         // Also for a settings file saved before the option existed.
         let old: Settings = serde_json::from_str(r#"{"language":"en"}"#).unwrap();
         assert!(old.pin_starred);
+    }
+
+    #[test]
+    fn automatic_updates_are_on_by_default() {
+        assert!(Settings::default().auto_update);
+        let old: Settings = serde_json::from_str(r#"{"language":"en"}"#).unwrap();
+        assert!(old.auto_update);
+        assert_eq!(old.updating_to, None);
     }
 
     #[test]

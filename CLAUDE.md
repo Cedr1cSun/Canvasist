@@ -26,11 +26,20 @@ cargo test probe_all_terms -- --ignored --nocapture   # live Gradescope probe; n
 
 CI (`.github/workflows/ci.yml`) runs exactly these checks on `windows-latest`. TypeScript stays on 6.x because typescript-eslint does not support 7 yet.
 
+### Releasing
+
+Releases are built locally and published only with the maintainer's approval.
+
+1. Once, the maintainer runs `scripts/setup-update-signing.ps1` in their own terminal. It creates the update signing key in `.secrets/` (git-ignored, readable only by their Windows account) and stores the key's password with DPAPI. Never ask for, print or copy the key or its password.
+2. Bump the version in `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock` and `src-tauri/tauri.conf.json`, and commit.
+3. `powershell -ExecutionPolicy Bypass -File scripts/build-release.ps1 -Notes "..."` builds the signed installer and `latest.json` in `src-tauri/target/release/bundle/nsis/`. Plain `npm run tauri build` stays unsigned, so anyone can build without the key.
+4. Upload both files to the GitHub release `v<version>`. Every release needs `latest.json`: installed copies look for it in the latest release.
+
 ## Architecture
 
 ### Backend (`src-tauri/src/`)
 
-- **`lib.rs`** wires everything together. It registers the plugins (single-instance must stay first), the managed state (`SettingsStore`, `Account`, `MarkStore`, `ReminderLog`), the tray and the scheduler. Closing the window only prevents exit; the process ends only on the tray's Quit. `--autostart` launches straight to the tray.
+- **`lib.rs`** wires everything together. It registers the plugins (single-instance must stay first), the managed state (`SettingsStore`, `Account`, `MarkStore`, `ReminderLog`, `Updates`), the tray and the scheduler. Closing the window only prevents exit; the process ends only on the tray's Quit. `--autostart` launches straight to the tray.
 - **`account.rs`** owns sign-in, the session and the refresh pipeline: Canvas fetch → `gradescope::refresh` → `merge::merge` → encrypted snapshot, then the `snapshot-updated` event. It also emits `auth-changed` and `canvas-login-cancelled`. Sign-out wipes the session, the snapshot, marks, the reminder log and the login window's WebView2 data. Files WebView2 still has locked are deleted on the next start (`finish_pending_wipe`).
 - **Login window** (`canvas-login`) loads `{canvas}/login` in its own WebView2 data dir (`login-webview`). After each page load its cookies are copied and checked against `/api/v1/users/self`. `cookies_for_url` must run on the async runtime; calling it synchronously in the page-load handler deadlocks WebView2.
 - **`canvas/`**:
@@ -52,7 +61,8 @@ CI (`.github/workflows/ci.yml`) runs exactly these checks on `windows-latest`. T
   - `secure_store.rs` writes DPAPI-encrypted `<name>.bin` records in the app local data dir. Use it for the session, snapshot, marks and reminder log: anything personal.
   - `settings.rs` is plain JSON in the config dir and must hold only non-personal preferences (course IDs are fine; names are not).
 - **`autostart.rs`** writes the per-user `Run` registry entry itself, with the exe path quoted, and release builds re-point it at the running exe on every start (after a move to another folder). Don't bring back tauri-plugin-autostart: it registers the path unquoted. The value is named after the product name, which the uninstaller also removes.
-- **Installer**: `windows/installer-hooks.nsh` (NSIS hooks) removes Canvasist's own files from a previous installation in a different folder, after closing it if it is running. To test installer changes without touching a real installation, build a copy with another product name, identifier and version: `npx tauri build --config <json>`.
+- **Installer**: `windows/installer-hooks.nsh` (NSIS hooks) removes Canvasist's own files from a previous installation in a different folder, after closing it if it is running. To test installer or update changes without touching a real installation, build a copy with another product name, identifier and version: `npx tauri build --config <json>`. For an update test, also give it a throwaway signing key and a local `http://127.0.0.1` endpoint (`dangerousInsecureTransportProtocol`), and build it with `build-release.ps1 -SecretsDir -ExtraConfig -AllowDirty`.
+- **`update.rs`** (tauri-plugin-updater): release builds check the latest GitHub release's `latest.json` 2 min after start and then daily (scheduler tick), download a newer installer in the background and keep it in memory until the user clicks "Restart to update". The plugin verifies the signature against `plugins.updater.pubkey`, and `requireSignedVersion` binds it to the announced version. The installer restarts the app with its original arguments, so `updating_to` in settings makes the restarted app open its window even after an `--autostart` start. The plugin's own commands are not granted to any window.
 - **`dpapi.rs`** is the only module allowed `unsafe`; the crate sets `unsafe_code = "deny"`.
 - **`error.rs`**: `AppError` serializes to `{ kind, ... }` for the frontend.
 

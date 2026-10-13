@@ -773,6 +773,11 @@ legend.settings__label + * {
   cursor: pointer;
 }
 
+.banner__action:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .settings__action {
   margin-top: 10px;
 }

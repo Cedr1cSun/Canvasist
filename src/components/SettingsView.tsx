@@ -141,6 +141,16 @@ export function SettingsView({
         </button>
       </div>
 
+      <SwitchSetting
+        label={t("settings.autoUpdate")}
+        hint={t("settings.autoUpdate.hint")}
+        checked={preferences.autoUpdate}
+        disabled={busy}
+        onChange={(enabled) =>
+          run(async () => onPreferencesChange(await api.setAutoUpdate(enabled)))
+        }
+      />
+
       {auth.state !== "signedOut" && (
         <>
           <ReminderSettings

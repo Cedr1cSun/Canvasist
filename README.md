@@ -21,6 +21,7 @@ Gradescope assignments usually don't appear in Canvas's assignment list, so chec
 - **Star important work**: starred assignments get their own group at the top (you can turn that off and keep just the star)
 - **Hide courses** you don't care about
 - **Works with most schools**: find your school by name or enter its Canvas address, then sign in on your school's own page (SSO and multi-factor authentication work as usual). No access token needed.
+- **Automatic updates**: a new version downloads in the background and installs only when you click **Restart to update**. Every update is signature-checked, and you can turn this off in Settings.
 - **English and Simplified Chinese**, following your system language
 - **Tiny footprint**: while it waits in the tray, Canvasist is a single process using about 8 MB of private memory and no measurable CPU (the window and its web view are fully closed until you open it); the installer is about 2 MB
 
@@ -31,6 +32,8 @@ Requires Windows 10 or 11.
 1. Download `Canvasist_x.y.z_x64-setup.exe` from the [Releases](../../releases/latest) page.
 2. Run it. The installer is not code-signed yet, so Windows SmartScreen may show "Windows protected your PC". Click **More info**, then **Run anyway**.
 3. Canvasist installs for your user account only (no administrator rights needed) and starts automatically when you sign in to Windows. You can turn that off in Settings.
+
+From version 0.2.0 on, Canvasist updates itself, so you only need to download it once.
 
 ## Getting started
 
@@ -46,6 +49,7 @@ When your school's Canvas session eventually expires, Canvasist shows a notifica
 - **Canvas**: assignments and submission status come from the Canvas REST API, using that session.
 - **Gradescope**: Gradescope has no public API. Canvasist opens your course's Gradescope tab in an invisible window, exactly as you would in a browser, keeps the Gradescope session that results, and then reads your course pages. Gradescope only signs you in this way from a course linked to Canvas. If none of your courses is linked, a window shows Gradescope's own login page so you can sign in once, with the same protections as the Canvas sign-in window.
 - **Background**: while the window is closed, a single lightweight task refreshes hourly (and right after the computer wakes) and checks reminders. No browser runs in the background.
+- **Updates**: once a day, Canvasist reads `latest.json` from this repository's latest GitHub release. If it lists a newer version, the installer is downloaded in the background and its signature is checked against the public key built into Canvasist; the signature must also name that exact version, so an older release can't be passed off as new. The installer runs only when you click **Restart to update**.
 
 ## Privacy and security
 
@@ -54,6 +58,7 @@ Canvasist runs entirely on your computer. There is no Canvasist server, account,
 - Your session, cached assignments, reminder history and the assignments you mark or dismiss are encrypted with Windows DPAPI, so only your Windows account can read them.
 - Session cookies are only ever sent to your own Canvas site and to Gradescope.
 - School search sends the name you type to Instructure's public school directory (the same one the official Canvas apps use). Entering your Canvas address directly skips this.
+- The daily update check downloads a small file from GitHub, which sees your IP address as with any download. Nothing else is sent. You can turn it off in Settings.
 - Logs never contain credentials, cookies, course names, assignment titles or grades.
 - Signing out deletes everything Canvasist stored, including the sign-in window's browser data.
 - The app's own window loads only bundled code under a strict Content Security Policy, and every internal command must be explicitly granted to it.

@@ -15,6 +15,7 @@ use crate::error::{AppError, AppResult};
 use crate::locale::{self, Locale};
 use crate::marks::{MarkStore, Marks};
 use crate::settings::{normalize_reminder_offsets, LanguagePreference, SettingsStore};
+use crate::update::{self, UpdateInfo, Updates};
 use crate::{autostart, gradescope, http, tray};
 
 #[derive(Debug, Serialize)]
@@ -197,6 +198,7 @@ pub struct Preferences {
     hidden_courses: Vec<String>,
     show_unsubmittable: bool,
     pin_starred: bool,
+    auto_update: bool,
 }
 
 fn preferences(store: &SettingsStore) -> Preferences {
@@ -206,6 +208,7 @@ fn preferences(store: &SettingsStore) -> Preferences {
         hidden_courses: s.hidden_courses,
         show_unsubmittable: s.show_unsubmittable,
         pin_starred: s.pin_starred,
+        auto_update: s.auto_update,
     }
 }
 
@@ -262,4 +265,33 @@ pub fn set_show_unsubmittable(
 pub fn set_pin_starred(store: State<'_, SettingsStore>, pin: bool) -> AppResult<Preferences> {
     store.update(|s| s.pin_starred = pin)?;
     Ok(preferences(&store))
+}
+
+#[tauri::command]
+pub fn set_auto_update(
+    store: State<'_, SettingsStore>,
+    updates: State<'_, Updates>,
+    enabled: bool,
+) -> AppResult<Preferences> {
+    store.update(|s| s.auto_update = enabled)?;
+    if enabled {
+        updates.check_soon();
+    }
+    Ok(preferences(&store))
+}
+
+// ---------- updates ----------
+
+/// The downloaded update waiting to be installed, if any.
+#[tauri::command]
+pub fn get_update(updates: State<'_, Updates>) -> Option<UpdateInfo> {
+    updates.ready()
+}
+
+/// Installs the downloaded update and restarts Canvasist. Async so that it
+/// runs off the main thread, like the updater plugin's own command: the
+/// plugin cleans up the app (tray icon, windows) before it exits.
+#[tauri::command]
+pub async fn install_update(app: AppHandle) -> AppResult<()> {
+    update::install(&app)
 }

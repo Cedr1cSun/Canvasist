@@ -1,4 +1,4 @@
-//! Windows toast notifications for reminders and sign-in problems.
+//! Windows toast notifications for reminders, sign-in problems and updates.
 //!
 //! Clicking a toast opens the main window: directly through the toast's
 //! activation handler, or, if Windows relaunches the app from its Start Menu
@@ -64,6 +64,14 @@ pub fn send_gradescope_expired(app: &AppHandle) {
         Locale::ZhCn => "Gradescope 登录已过期，请打开 Canvasist 重新登录。",
     };
     show(app, "Canvasist", body);
+}
+
+pub fn send_update_ready(app: &AppHandle, version: &str) {
+    let body = match locale(app) {
+        Locale::En => format!("Version {version} is ready. Open Canvasist to restart and update."),
+        Locale::ZhCn => format!("新版本 {version} 已就绪，打开 Canvasist 即可重启更新。"),
+    };
+    show(app, "Canvasist", &body);
 }
 
 #[cfg(windows)]

@@ -4,6 +4,7 @@ import { ConnectView } from "./components/ConnectView";
 import { Header } from "./components/Header";
 import { LoginPending } from "./components/LoginPending";
 import { SettingsView } from "./components/SettingsView";
+import { describeError } from "./errors";
 import { I18nProvider, useT } from "./i18n/context";
 import {
   api,
@@ -16,6 +17,7 @@ import {
   type LanguagePreference,
   type Preferences,
   type SettingsView as Settings,
+  type UpdateInfo,
 } from "./ipc";
 
 type View = "home" | "settings";
@@ -96,6 +98,9 @@ function Shell({
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<AppError | null>(null);
+  const [update, setUpdate] = useState<UpdateInfo | null>(null);
+  const [installing, setInstalling] = useState(false);
+  const [updateError, setUpdateError] = useState<AppError | null>(null);
 
   // `waitIfBusy`: a refresh that is already running started before something
   // changed (such as a Gradescope sign-in), so wait for it and run again.
@@ -154,11 +159,41 @@ function Shell({
       // Hourly and wake-up refreshes run in the background and arrive here.
       events.onSnapshotUpdated(setSnapshot),
       events.onGradescopeLoginCompleted(() => void refresh(true)),
+      // Downloaded in the background while the window was open.
+      events.onUpdateReady(setUpdate),
     ];
     return () => {
       for (const s of subscriptions) void s.then((unlisten) => unlisten());
     };
   }, [onAuthChange, refresh]);
+
+  // An update downloaded while the window was closed.
+  useEffect(() => {
+    let cancelled = false;
+    api.getUpdate().then(
+      (ready) => {
+        if (!cancelled && ready) setUpdate(ready);
+      },
+      () => {
+        // Without it the banner simply stays hidden; the next check announces the update again.
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // On success Canvasist exits here, and the installer starts it again.
+  const installUpdate = useCallback(async () => {
+    setInstalling(true);
+    setUpdateError(null);
+    try {
+      await api.installUpdate();
+    } catch (e) {
+      setUpdateError(toAppError(e));
+      setInstalling(false);
+    }
+  }, []);
 
   // Hidden courses (settings) are filtered out of the list here.
   const visibleSnapshot = useMemo(() => {
@@ -222,6 +257,24 @@ function Shell({
         onOpenSettings={() => setView("settings")}
       />
       <main className="main">
+        {update && (
+          <div className="banner" role="status">
+            <span>{t("banner.update", { version: update.version })}</span>
+            <button
+              type="button"
+              className="banner__action"
+              disabled={installing}
+              onClick={() => void installUpdate()}
+            >
+              {t("banner.updateAction")}
+            </button>
+          </div>
+        )}
+        {updateError && (
+          <p className="form-error" role="alert">
+            {describeError(t, updateError)}
+          </p>
+        )}
         {loginPending ? (
           <LoginPending
             onCancel={() => {

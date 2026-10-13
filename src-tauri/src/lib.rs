@@ -18,6 +18,7 @@ mod scheduler;
 mod secure_store;
 mod settings;
 mod tray;
+mod update;
 mod window;
 
 use tauri::{AppHandle, Manager, RunEvent};
@@ -28,6 +29,7 @@ use crate::marks::MarkStore;
 use crate::reminders::ReminderLog;
 use crate::secure_store::SecureStore;
 use crate::settings::SettingsStore;
+use crate::update::Updates;
 
 pub fn run() {
     let app = tauri::Builder::default()
@@ -38,6 +40,8 @@ pub fn run() {
         }))
         .plugin(logger())
         .plugin(tauri_plugin_opener::init())
+        // Configured under plugins.updater in tauri.conf.json (see update.rs).
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let config_dir = app.path().app_config_dir()?;
             app.manage(SettingsStore::load(&config_dir));
@@ -48,13 +52,15 @@ pub fn run() {
             app.manage(Account::load(SecureStore::new(data_dir.clone())));
             app.manage(MarkStore::load(SecureStore::new(data_dir.clone())));
             app.manage(ReminderLog::load(SecureStore::new(data_dir)));
+            app.manage(Updates::new(std::time::SystemTime::now()));
 
             apply_autostart_defaults(app.handle());
             tray::create(app.handle())?;
             scheduler::start(app.handle().clone());
 
             let started_by_os = std::env::args().any(|arg| arg == AUTOSTART_ARG);
-            if !started_by_os {
+            let updated = update::take_restart_marker(app.handle());
+            if !started_by_os || updated {
                 window::show_main(app.handle());
             }
             log::info!(
@@ -89,6 +95,9 @@ pub fn run() {
             commands::set_course_hidden,
             commands::set_show_unsubmittable,
             commands::set_pin_starred,
+            commands::set_auto_update,
+            commands::get_update,
+            commands::install_update,
         ])
         .build(tauri::generate_context!())
         .expect("failed to build the Canvasist application");

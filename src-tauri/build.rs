@@ -28,6 +28,9 @@ fn main() {
             "set_course_hidden",
             "set_show_unsubmittable",
             "set_pin_starred",
+            "set_auto_update",
+            "get_update",
+            "install_update",
         ]),
     ))
     .expect("failed to run tauri-build");

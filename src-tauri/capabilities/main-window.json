@@ -29,6 +29,9 @@
     "allow-set-course-hidden",
     "allow-set-show-unsubmittable",
     "allow-set-pin-starred",
+    "allow-set-auto-update",
+    "allow-get-update",
+    "allow-install-update",
     "core:event:allow-listen",
     "core:event:allow-unlisten"
   ]

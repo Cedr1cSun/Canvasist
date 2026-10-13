@@ -76,6 +76,8 @@ export const zhCN: Record<MessageKey, string> = {
     "无法经由 Canvas 打开你的 Gradescope 课程。单独登录 Gradescope 一次，即可读取其中的作业。",
   "banner.gradescopeDirectAction": "登录 Gradescope",
   "banner.gradescopeUnavailable": "暂时无法连接 Gradescope，下次刷新时会自动重试。",
+  "banner.update": "新版本 {version} 已就绪",
+  "banner.updateAction": "重启更新",
 
   "settings.title": "设置",
   "settings.back": "返回",
@@ -83,6 +85,9 @@ export const zhCN: Record<MessageKey, string> = {
   "settings.language.system": "跟随系统",
   "settings.autostart": "登录 Windows 时自动启动",
   "settings.autostart.hint": "Canvasist 会安静地运行在系统托盘中，确保提醒正常工作。",
+  "settings.autoUpdate": "自动检查更新",
+  "settings.autoUpdate.hint":
+    "每天向 GitHub 查询一次新版本并在后台下载。更新包都经过签名验证，只在你点击“重启更新”后才安装。",
   "settings.reminders": "提醒",
   "settings.reminders.hint": "在截止前发送系统通知。已完成、已划除和已隐藏课程的作业不会提醒。",
   "settings.reminders.none": "不提醒",
@@ -117,4 +122,5 @@ export const zhCN: Record<MessageKey, string> = {
   "error.sessionExpired": "Canvas 登录已过期，请重新登录。",
   "error.canvas": "Canvas 返回了错误（{message}）。",
   "error.busy": "正在刷新中。",
+  "error.update": "更新安装失败（{message}）。",
 };
