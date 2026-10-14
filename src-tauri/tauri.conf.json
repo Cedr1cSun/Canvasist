@@ -42,7 +42,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU5MEMzNEY1RTkxRDU0NTEKUldSUlZCM3A5VFFNNlk0V2dlM0FwbWtqdHJseHVHbmFQMXBRakVXTEZ3dnF5L0NKYWFZM2NxYVIK",
       "endpoints": [
         "https://github.com/ImmortalKilan/Canvasist/releases/latest/download/latest.json"
       ],
