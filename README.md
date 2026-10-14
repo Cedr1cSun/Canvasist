@@ -6,6 +6,10 @@
 
 <p align="center">Never miss a Canvas or Gradescope deadline again.</p>
 
+<p align="center">
+  <img src="assets/screenshots/overview.png" width="760" alt="Canvasist in light and dark mode: assignments grouped into Important, Overdue, Today, Tomorrow, Next 7 days and Later, with a countdown on work due today">
+</p>
+
 Canvasist is a small, open-source Windows app that gathers every assignment from **Canvas** and **Gradescope** into one minimal list, shows each deadline with its submission status, and reminds you before anything is due. It lives quietly in the system tray and uses almost no resources while it waits.
 
 Gradescope assignments usually don't appear in Canvas's assignment list, so checking Canvas alone makes it easy to miss work. Canvasist reads both and merges duplicates.
@@ -22,8 +26,14 @@ Gradescope assignments usually don't appear in Canvas's assignment list, so chec
 - **Hide courses** you don't care about
 - **Works with most schools**: find your school by name or enter its Canvas address, then sign in on your school's own page (SSO and multi-factor authentication work as usual). No access token needed.
 - **Automatic updates**: a new version downloads in the background and installs only when you click **Restart to update**. Every update is signature-checked, and you can turn this off in Settings.
-- **English and Simplified Chinese**, following your system language
+- **English and Simplified Chinese**, **light and dark** themes, both following your system settings
 - **Tiny footprint**: while it waits in the tray, Canvasist is a single process using about 8 MB of private memory and no measurable CPU (the window and its web view are fully closed until you open it); the installer is about 2 MB
+
+<p align="center">
+  <img src="assets/screenshots/star.gif" width="330" alt="Starring an assignment from its menu moves it into the Important group at the top">
+</p>
+
+Screenshots show made-up courses from the app's demo mode.
 
 ## Install
 
@@ -78,6 +88,7 @@ Found a security problem? Please see [SECURITY.md](SECURITY.md).
 ```sh
 npm ci                 # install frontend dependencies (install scripts are disabled by .npmrc)
 npm run tauri dev      # run the app with hot reload
+npm run demo           # the UI alone in a browser, with made-up data (no Canvas account needed)
 npm run tauri build    # build the release app and installer
 ```
 

@@ -11,6 +11,7 @@ Canvasist is a Windows tray app (Tauri 2: Rust backend in `src-tauri/`, React 19
 ```sh
 npm ci                  # .npmrc sets ignore-scripts=true and save-exact=true
 npm run tauri dev       # app with hot reload (Vite on fixed port 1420)
+npm run demo            # frontend alone in a browser on port 1430, with made-up data (src/demo)
 npm run tauri build     # release app + NSIS installer in src-tauri/target/release/bundle/nsis/
 
 # Frontend checks (all run in CI)
@@ -68,6 +69,7 @@ Releases are built locally and published only with the maintainer's approval.
 
 ### Frontend (`src/`)
 
+- `demo/` is a fake backend (Tauri's `mockIPC`) with generic courses, loaded only when Vite runs in demo mode. Keep it in step with new commands, and take screenshots (README, promotion) only from it, never from a signed-in app.
 - `harden.ts` freezes `Object.prototype` and must stay the first import in `main.tsx`. Do **not** use Tauri's `freezePrototype` option instead: Tauri injects it into every webview, and it breaks schools' SSO/Duo pages in the login window.
 - `ipc.ts` has typed wrappers for every command and event; keep it in sync with `commands.rs` and `account.rs`. `errors.ts` maps `AppError.kind` to localized text.
 - `App.tsx` holds the state machine: loading → connect → login pending → list or settings. It also filters hidden courses out of the snapshot. Pure logic lives in tested modules: `grouping.ts` (Important for starred work when pinned, then Overdue/Today/Tomorrow/7 days/Later, plus folded Completed and Dismissed), `urgency.ts` and `format.ts`.
