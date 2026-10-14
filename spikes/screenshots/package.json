@@ -1,0 +1,15 @@
+{
+  "name": "canvasist-screenshots",
+  "private": true,
+  "type": "module",
+  "description": "Screenshots and the README GIF, captured from demo mode (made-up data only) with Microsoft Edge.",
+  "scripts": {
+    "capture": "node capture.mjs out",
+    "gif": "node gif.mjs out/star-en.gif en"
+  },
+  "dependencies": {
+    "playwright-core": "1.63.0",
+    "gifenc": "1.0.3",
+    "pngjs": "7.0.0"
+  }
+}
