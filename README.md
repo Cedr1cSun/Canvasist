@@ -83,6 +83,8 @@ Found a security problem? Please see [SECURITY.md](SECURITY.md).
 
 ## Development
 
+Contributions are welcome; please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+
 **Prerequisites (Windows):** Node.js 24+, the Rust stable toolchain (MSVC), Visual Studio C++ Build Tools, and WebView2 (preinstalled on Windows 11).
 
 ```sh

@@ -1,0 +1,53 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please **don't include** passwords, cookies, course names, assignment titles, grades or screenshots taken while signed in. English or Chinese is fine.
+        Found a security problem? Please [report it privately](https://github.com/ImmortalKilan/Canvasist/security/advisories/new) instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Canvasist
+        2. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Canvasist version
+      description: Shown under Settings → About.
+      placeholder: "0.2.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 24H2
+  - type: textarea
+    id: log
+    attributes:
+      label: Log (optional)
+      description: |
+        The log never contains personal data, so it is safe to paste. It is at
+        `%LOCALAPPDATA%\io.github.immortalkilan.canvasist\logs\Canvasist.log`.
+      render: text
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: This report contains no passwords, cookies, course names, assignment titles, grades or signed-in screenshots.
+          required: true

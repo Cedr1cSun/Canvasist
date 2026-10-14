@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest an idea for Canvasist
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for the idea! English or Chinese is fine.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the situation, for example "I keep missing deadlines that are only posted in announcements".
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would you like Canvasist to do?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Anything else?
+      description: Alternatives you considered, or how other tools handle it.
