@@ -414,7 +414,7 @@ dependencies = [
 
 [[package]]
 name = "canvasist"
-version = "0.1.3"
+version = "0.2.0"
 dependencies = [
  "cookie_store",
  "futures-util",
