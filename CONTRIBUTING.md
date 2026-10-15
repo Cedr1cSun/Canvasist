@@ -2,6 +2,8 @@
 
 Thanks for helping! Bug reports, ideas and pull requests are all welcome, in English or Chinese.
 
+Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md) ([中文翻译](https://www.contributor-covenant.org/zh-cn/version/2/1/code_of_conduct/)).
+
 ## Keep personal data out of issues
 
 Canvasist handles school sign-in sessions, so please never post:
